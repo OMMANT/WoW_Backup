@@ -1,37 +1,18 @@
 import os
-from time import strftime
-from turtle import back
+import fire
 import zipfile
 from tqdm import tqdm
 from pathlib import Path
+from time import strftime
 from zipfile import ZipFile
 from datetime import datetime
 
 wow_path = Path('C:\Program Files (x86)\World of Warcraft\_retail_')
 backup_path = wow_path / 'Backup'
 now = datetime.now()
-file_name = now.strftime('%y%m%d_%H_%M_%S.zip')
 
-def check_compressing():
-    try:
-        recent_file = [x for x in os.listdir(backup_path) if x.endswith('.zip')][-1].split('_')
-        ## Pass compressing (same day within 3 hours)
-        same_day = now.strftime('%y%m%d') == recent_file[0]
-        within3hours = int(now.strftime('%H')) <= int(recent_file[1])
-        if same_day and within3hours:
-            print('Compressed recently!')
-        else: return True
-    except IndexError:
-        return True    
-
-
-if __name__ == '__main__':
-    print('WoW Addon & Settings Backup Program v1.2 - by OMM')
-    print('===============================================')
-    now = datetime.now()
-    file_name = now.strftime('%y%m%d_%H_%M_%S.zip')
-    print(f'Backup File name: {file_name}')
-    if check_compressing():
+def backup(force=False, check=True, file_name=now.strftime('%y%m%d_%H_%M_%S.zip')):
+    if force or (check and check_compressing()):
         for_zip = ['Fonts', 'Interface', 'WTF']
         print(f'Backup {for_zip} to {str(backup_path / file_name)}')
         print('Compressing.', end='')
@@ -54,5 +35,24 @@ if __name__ == '__main__':
             for rm in tqdm(zip_files[:n]):
                 p = backup_path / rm
                 os.remove(p)
+
+
+def check_compressing():
+    try:
+        recent_file = [x for x in os.listdir(backup_path) if x.endswith('.zip')][-1].split('_')
+        ## Pass compressing (same day within 3 hours)
+        same_day = now.strftime('%y%m%d') == recent_file[0]
+        within3hours = int(now.strftime('%H')) <= int(recent_file[1])
+        if same_day and within3hours:
+            print('Compressed recently!')
+        else: return True
+    except IndexError:
+        return True    
+
+
+if __name__ == '__main__':
+    print('WoW Addon & Settings Backup Program v1.2 - by OMM')
+    print('===============================================')
+    fire.Fire(backup)
     print('Done!')
 
